@@ -1,11 +1,13 @@
 package com.crudjpa.controller;
 
+import com.crudjpa.client.IHealthClient;
 import com.crudjpa.enums.MapFrom;
 import com.crudjpa.exception.CreateResourceValidationException;
 import com.crudjpa.exception.ResourceNotFoundException;
 import com.crudjpa.exception.UpdateResourceValidationException;
 import com.crudjpa.mapping.IEntityMapper;
 import com.crudjpa.service.ICrudService;
+import com.crudjpa.util.HttpStatusCheckCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
@@ -50,6 +52,23 @@ public abstract class CrudController<Entity, Id, EntityResource, EntityCreate, E
             e.printStackTrace();
         }
         return "";
+    }
+
+    protected void throwRuntimeException(String message) {
+        throw new RuntimeException(message);
+    }
+
+    protected void validateHealthClient(IHealthClient client, String clientName) {
+        try {
+            if(!HttpStatusCheckCode.from(client.isOk()).isOk())
+                throwRuntimeException("The healthcheck for the client %s request returns an invalid status code".formatted(clientName));
+        } catch (Exception e) {
+            throwRuntimeException("The client %s is not available or the url for healthcheck request is invalid".formatted(clientName));
+        }
+    }
+
+    protected void validateHealthClient(IHealthClient client) {
+        validateHealthClient(client, client.getClass().getSimpleName());
     }
 
     protected void throwResourceNotFoundException(String message) throws RuntimeException {
