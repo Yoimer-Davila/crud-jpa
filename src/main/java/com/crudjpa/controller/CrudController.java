@@ -81,7 +81,7 @@ public abstract class CrudController<Entity, Id, EntityResource, EntityCreate, E
 
     protected List<EntityResource> getAllResources() {
         List<Entity> entities = this.crudService.getAll();
-        return entities.stream().map(this::fromModelToResource).toList();
+        return entities.stream().map(it -> this.fromModelToResource(it, MapFrom.GET)).toList();
     }
 
     protected ResponseEntity<List<EntityResource>> getAll() {
